@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ckode.ServiceLocator", "Ckode.ServiceLocator\Ckode.ServiceLocator.csproj", "{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ckode.ServiceLocator.Examples", "Ckode.ServiceLocator.Examples\Ckode.ServiceLocator.Examples.csproj", "{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {234749DF-203D-4F50-A8E1-A5A1E3F215B2}
+	EndGlobalSection
+EndGlobal
