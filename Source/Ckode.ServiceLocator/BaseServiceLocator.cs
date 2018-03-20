@@ -31,9 +31,20 @@ namespace Ckode.ServiceLocator
             Types = classTypes.ToList().AsReadOnly();
         }
 
+        protected static Delegate CreateDelegate(ConstructorInfo constructor, Type returnType)
+        {
+            Type delegateType = typeof(Func<>).MakeGenericType(returnType);
+            return CreateDelegateInternal(constructor, delegateType);
+        }
+
         protected static Delegate CreateDelegate<T>(ConstructorInfo constructor)
         {
             Type delegateType = typeof(Func<T>);
+            return CreateDelegateInternal(constructor, delegateType);
+        }
+
+        private static Delegate CreateDelegateInternal(ConstructorInfo constructor, Type delegateType)
+        {
             if (constructor == null)
             {
                 throw new ArgumentNullException("constructor");

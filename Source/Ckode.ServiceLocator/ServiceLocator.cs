@@ -44,6 +44,22 @@ namespace Ckode.ServiceLocator
             return ((Func<T>)ctorDelegate)();
         }
 
+        public object CreateInstance(Type type)
+        {
+            if (!_constructors.TryGetValue(type, out var ctorDelegate))
+            {
+                lock (_constructorsLock)
+                {
+                    if (!_constructors.TryGetValue(type, out ctorDelegate))
+                    {
+                        _constructors[type] = ctorDelegate = CreateObjectCtorDelegate(type);
+                    }
+                }
+            }
+
+            return ((Func<object>)ctorDelegate)();
+        }
+
         /// <summary>
         /// Create an instance of every class that implements the given interface.
         /// </summary>
@@ -86,6 +102,17 @@ namespace Ckode.ServiceLocator
             var ctorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 
             return CreateDelegate<T>(ctorInfo);
+        }
+
+        private Delegate CreateObjectCtorDelegate(Type interfaceType)
+        {
+            var classType = (interfaceType.IsInterface || interfaceType.IsAbstract)
+                                ? Types.SingleOrDefault(type => interfaceType.IsAssignableFrom(type))
+                                : interfaceType;
+
+            var ctorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
+
+            return CreateDelegate(ctorInfo, interfaceType);
         }
     }
 }

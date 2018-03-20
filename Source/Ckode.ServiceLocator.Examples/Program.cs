@@ -14,7 +14,7 @@ namespace Ckode.ServiceLocator.Examples
             Variant2();
             Variant3();
             Variant4();
-
+            Variant5();
         }
 
         static void Variant1()
@@ -61,6 +61,17 @@ namespace Ckode.ServiceLocator.Examples
                 Console.WriteLine($"Found a repository implementation: {repository.GetType().FullName} with the LocatorKey: {repository.LocatorKey.ToString()}");
             }
             Console.WriteLine();
+        }
+
+        static void Variant5()
+        {
+            var serviceLocator = new ServiceLocator();
+            var instantiatedByInterface = serviceLocator.CreateInstance(typeof(Variant5.IUserRepository));
+            var instantiatedByClass = serviceLocator.CreateInstance(typeof(Variant5.UserRepository));
+
+            Console.WriteLine("Variant 5:");
+            Console.WriteLine($"Instantiated by interface: {instantiatedByInterface.GetType().FullName}");
+            Console.WriteLine($"Instantiated by class: {instantiatedByClass.GetType().FullName}");
         }
     }
 }
