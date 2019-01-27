@@ -1,5 +1,11 @@
 ﻿Version	Date		Developer
 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+1.1.1	27-01-2019	Steffen Skov
+
+	* Added static IList<string> FailedAssemblies to the base class BaseServiceLocator.
+	  Look through this list if you ever encounter issues with types not being found or similar.
+
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 1.1.0	20-03-2018	Steffen Skov
 
 	* Added support for CreateInstance(Type type) on the basic ServiceLocator.
