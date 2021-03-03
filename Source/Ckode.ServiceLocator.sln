@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ckode.ServiceLocator", "Ckode.ServiceLocator\Ckode.ServiceLocator.csproj", "{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ckode.ServiceLocator", "Ckode.ServiceLocator\Ckode.ServiceLocator.csproj", "{595F0C4D-2F0D-496C-9B76-0F1DD1E8918E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ckode.ServiceLocator.Examples", "Ckode.ServiceLocator.Examples\Ckode.ServiceLocator.Examples.csproj", "{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ckode.ServiceLocator.Tests", "Ckode.ServiceLocator.Tests\Ckode.ServiceLocator.Tests.csproj", "{F02C5865-4B98-4DB1-9A77-0DDF2C729A51}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6C450BD8-53F7-4687-B222-E1AAC54C2E71}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,19 +18,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{534F1DA4-C1C5-4926-924E-1CA0CB7F7A84}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B8F1E51D-FFA2-40DA-8849-CA1B661E22D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{595F0C4D-2F0D-496C-9B76-0F1DD1E8918E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{595F0C4D-2F0D-496C-9B76-0F1DD1E8918E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{595F0C4D-2F0D-496C-9B76-0F1DD1E8918E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{595F0C4D-2F0D-496C-9B76-0F1DD1E8918E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F02C5865-4B98-4DB1-9A77-0DDF2C729A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F02C5865-4B98-4DB1-9A77-0DDF2C729A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F02C5865-4B98-4DB1-9A77-0DDF2C729A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F02C5865-4B98-4DB1-9A77-0DDF2C729A51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {234749DF-203D-4F50-A8E1-A5A1E3F215B2}
+		SolutionGuid = {147890D3-C1CF-4119-887C-242A2EE0DB43}
 	EndGlobalSection
 EndGlobal

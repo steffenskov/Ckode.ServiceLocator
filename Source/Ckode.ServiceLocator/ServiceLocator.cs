@@ -97,22 +97,44 @@ namespace Ckode.ServiceLocator
 
         private Delegate CreateCtorDelegate<T>(Type interfaceType)
         {
-            var classType = Types.SingleOrDefault(type => interfaceType.IsAssignableFrom(type));
-
-            var ctorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
+            var ctorInfo = GetConstructorInfo(interfaceType);
 
             return CreateDelegate<T>(ctorInfo);
         }
 
         private Delegate CreateObjectCtorDelegate(Type interfaceType)
         {
-            var classType = (interfaceType.IsInterface || interfaceType.IsAbstract)
-                                ? Types.SingleOrDefault(type => interfaceType.IsAssignableFrom(type))
-                                : interfaceType;
+            var ctorInfo = GetConstructorInfo(interfaceType);
+
+            return CreateDelegate(ctorInfo, interfaceType);
+        }
+
+        private static ConstructorInfo GetConstructorInfo(Type interfaceType)
+        {
+            IList<Type> classTypes = (interfaceType.IsInterface || interfaceType.IsAbstract)
+                                        ? Types
+                                            .Where(type => interfaceType.IsAssignableFrom(type))
+                                            .ToArray()
+                                        : new[] { interfaceType };
+
+            if (classTypes.Count > 1)
+            {
+                throw new ArgumentException($"Multiple implementations of type {interfaceType.Name} exists, cannot create a single instance.", nameof(interfaceType));
+            }
+            if (classTypes.Count == 0)
+            {
+                throw new ArgumentException($"No implementations of type {interfaceType.Name} exists, cannot create an instance.", nameof(interfaceType));
+            }
+            var classType = classTypes[0];
 
             var ctorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 
-            return CreateDelegate(ctorInfo, interfaceType);
+            if (ctorInfo == null)
+            {
+                throw new ArgumentException($"The implementation of type {interfaceType.Name} doesn't have a parameterless constructor. This is required to create an instance.", nameof(interfaceType));
+            }
+
+            return ctorInfo;
         }
     }
 }

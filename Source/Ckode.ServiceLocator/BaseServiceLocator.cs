@@ -69,19 +69,6 @@ namespace Ckode.ServiceLocator
             }
             var constructorParam = constructor.GetParameters();
 
-            // Validate the signatures
-            var delParams = delMethod.GetParameters();
-            if (delParams.Length != constructorParam.Length)
-            {
-                throw new InvalidOperationException("The delegate signature does not match that of the constructor");
-            }
-            for (var i = 0; i < delParams.Length; i++)
-            {
-                if (delParams[i].ParameterType != constructorParam[i].ParameterType || delParams[i].IsOut)
-                {
-                    throw new InvalidOperationException("The delegate signature does not match that of the constructor");
-                }
-            }
             // Create the dynamic method
             var method =
                 new DynamicMethod(
@@ -93,31 +80,7 @@ namespace Ckode.ServiceLocator
 
             // Create the il
             var gen = method.GetILGenerator();
-            for (var i = 0; i < constructorParam.Length; i++)
-            {
-                if (i < 4)
-                {
-                    switch (i)
-                    {
-                        case 0:
-                            gen.Emit(OpCodes.Ldarg_0);
-                            break;
-                        case 1:
-                            gen.Emit(OpCodes.Ldarg_1);
-                            break;
-                        case 2:
-                            gen.Emit(OpCodes.Ldarg_2);
-                            break;
-                        case 3:
-                            gen.Emit(OpCodes.Ldarg_3);
-                            break;
-                    }
-                }
-                else
-                {
-                    gen.Emit(OpCodes.Ldarg_S, i);
-                }
-            }
+           
             gen.Emit(OpCodes.Newobj, constructor);
             gen.Emit(OpCodes.Ret);
 

@@ -20,15 +20,20 @@ namespace Ckode.ServiceLocator
             _cachedConstructors = new ConcurrentDictionary<Type, IDictionary<TKey, Func<T>>>();
         }
 
-        public ServiceLocator(bool ensureAllKeysHaveValues = false)
+        public ServiceLocator()
         {
-            var locatorType = this.GetType();
+            var locatorType = GetType();
             if (_cachedConstructors.TryGetValue(locatorType, out _constructors))
+            {
                 return;
+            }
+
             lock (_cacheLock)
             {
                 if (_cachedConstructors.TryGetValue(locatorType, out _constructors))
+                {
                     return;
+                }
 
                 _constructors = new Dictionary<TKey, Func<T>>();
                 var interfaceType = typeof(T);
@@ -41,7 +46,9 @@ namespace Ckode.ServiceLocator
                     var instance = ctorDelegate();
                     var key = instance.LocatorKey;
                     if (_constructors.ContainsKey(key))
+                    {
                         throw new InvalidOperationException("Two classes are not allowed to return the same key when calling GetKey.");
+                    }
 
                     _constructors[key] = ctorDelegate;
                 }
@@ -52,13 +59,14 @@ namespace Ckode.ServiceLocator
         public IEnumerable<T> CreateInstances()
         {
             foreach (var ctor in _constructors)
+            {
                 yield return ctor.Value();
+            }
         }
 
         public T CreateInstance(TKey key)
         {
-            Func<T> ctorDelegate;
-            if (!_constructors.TryGetValue(key, out ctorDelegate))
+            if (!_constructors.TryGetValue(key, out var ctorDelegate))
             {
                 throw new ArgumentException(string.Format("Couldn't find any class that implements type {0} and has the key {1}.", typeof(T).Name, key), "key");
             }
