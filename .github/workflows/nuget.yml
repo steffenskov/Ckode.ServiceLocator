@@ -1,4 +1,4 @@
-name: "Deployt to NuGet"
+name: "Deploy to NuGet"
 
 on: 
   push:
@@ -23,7 +23,7 @@ jobs:
       with:
       dotnet-version: '4.6.1'
 
-    - name 'Restore packages'
+    - name: 'Restore packages'
       run: dotnet restore ${{ env.PROJECT_PATH }}
       
     - name: 'Build project'
