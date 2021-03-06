@@ -23,41 +23,38 @@ namespace Ckode.ServiceLocator
         }
 
         /// <summary>
-        /// Create an instance of the class that implements the given interface.
+        /// Create an instance of the class that implements the given type.
         /// </summary>
-        /// <typeparam name="T">The interface the class must implement</typeparam>
+        /// <typeparam name="T">The interface or baseclass the class must implement</typeparam>
         /// <returns></returns>
         public T CreateInstance<T>()
         {
-            var interfaceType = typeof(T);
-            if (!_constructors.TryGetValue(interfaceType, out var ctorDelegate))
-            {
-                lock (_constructorsLock)
-                {
-                    if (!_constructors.TryGetValue(interfaceType, out ctorDelegate))
-                    {
-                        _constructors[interfaceType] = ctorDelegate = CreateCtorDelegate<T>(interfaceType);
-                    }
-                }
-            }
+            var type = typeof(T);
+            var constructorDelegate = GetConstructorDelegate(type, CreateConstructorDelegate<T>);
 
-            return ((Func<T>)ctorDelegate)();
+            return ((Func<T>)constructorDelegate)();
         }
 
         public object CreateInstance(Type type)
         {
-            if (!_constructors.TryGetValue(type, out var ctorDelegate))
+            var constructorDelegate = GetConstructorDelegate(type, CreateObjectConstructorDelegate);
+
+            return ((Func<object>)constructorDelegate)();
+        }
+
+        private Delegate GetConstructorDelegate(Type type, Func<Type, Delegate> createDelegate)
+        {
+            if (!_constructors.TryGetValue(type, out var constructorDelegate))
             {
                 lock (_constructorsLock)
                 {
-                    if (!_constructors.TryGetValue(type, out ctorDelegate))
+                    if (!_constructors.TryGetValue(type, out constructorDelegate))
                     {
-                        _constructors[type] = ctorDelegate = CreateObjectCtorDelegate(type);
+                        _constructors[type] = constructorDelegate = createDelegate(type);
                     }
                 }
             }
-
-            return ((Func<object>)ctorDelegate)();
+            return constructorDelegate;
         }
 
         /// <summary>
@@ -68,51 +65,53 @@ namespace Ckode.ServiceLocator
         public IEnumerable<T> CreateInstances<T>()
         {
             var interfaceType = typeof(T);
-            if (!_multipleConstructors.TryGetValue(interfaceType, out var ctorDelegates))
+            if (!_multipleConstructors.TryGetValue(interfaceType, out var constructorDelegates))
             {
                 lock (_multipleConstructorsLock)
                 {
-                    if (!_multipleConstructors.TryGetValue(interfaceType, out ctorDelegates))
+                    if (!_multipleConstructors.TryGetValue(interfaceType, out constructorDelegates))
                     {
-                        _multipleConstructors[interfaceType] = ctorDelegates = CreateMultipleCtorDelegates<T>(interfaceType);
+                        _multipleConstructors[interfaceType] = constructorDelegates = CreateMultipleConstructorDelegates<T>(interfaceType);
                     }
                 }
             }
 
-            return ctorDelegates
-                .Cast<Func<T>>()
-                .Select(ctor => ctor());
+            return constructorDelegates
+                    .Cast<Func<T>>()
+                    .Select(ctor => ctor());
         }
 
-        private IList<Delegate> CreateMultipleCtorDelegates<T>(Type interfaceType)
+        private IList<Delegate> CreateMultipleConstructorDelegates<T>(Type interfaceType)
         {
-            var classTypes = Types.Where(type => interfaceType.IsAssignableFrom(type));
+            var classTypes = ImplementationTypes
+                                .Where(type => interfaceType.IsAssignableFrom(type));
 
-            var ctorInfos = classTypes.Select(classType => classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null));
+            var constructorInfos = classTypes
+                                    .Select(classType => classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null));
 
-            return ctorInfos
-                .Select(ctorInfo => CreateDelegate<T>(ctorInfo))
-                .ToArray();
+            return constructorInfos
+                    .Select(CreateDelegate<T>)
+                    .ToList();
         }
 
-        private Delegate CreateCtorDelegate<T>(Type interfaceType)
+        private Delegate CreateConstructorDelegate<T>(Type interfaceType)
         {
-            var ctorInfo = GetConstructorInfo(interfaceType);
+            var constructorInfo = GetConstructorInfo(interfaceType);
 
-            return CreateDelegate<T>(ctorInfo);
+            return CreateDelegate<T>(constructorInfo);
         }
 
-        private Delegate CreateObjectCtorDelegate(Type interfaceType)
+        private Delegate CreateObjectConstructorDelegate(Type interfaceType)
         {
-            var ctorInfo = GetConstructorInfo(interfaceType);
+            var constructorInfo = GetConstructorInfo(interfaceType);
 
-            return CreateDelegate(ctorInfo, interfaceType);
+            return CreateDelegate(constructorInfo, interfaceType);
         }
 
         private static ConstructorInfo GetConstructorInfo(Type interfaceType)
         {
             IList<Type> classTypes = (interfaceType.IsInterface || interfaceType.IsAbstract)
-                                        ? Types
+                                        ? ImplementationTypes
                                             .Where(type => interfaceType.IsAssignableFrom(type))
                                             .ToArray()
                                         : new[] { interfaceType };
@@ -127,14 +126,14 @@ namespace Ckode.ServiceLocator
             }
             var classType = classTypes[0];
 
-            var ctorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
+            var constructorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 
-            if (ctorInfo == null)
+            if (constructorInfo == null)
             {
                 throw new ArgumentException($"The implementation of type {interfaceType.Name} doesn't have a parameterless constructor. This is required to create an instance.", nameof(interfaceType));
             }
 
-            return ctorInfo;
+            return constructorInfo;
         }
     }
 }

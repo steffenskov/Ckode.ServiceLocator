@@ -6,89 +6,83 @@ namespace Ckode.ServiceLocator.Tests
 {
     public class GenericServiceLocatorTests
     {
-        public interface IImplementation { }
-        public interface IMultipleImplementations { }
-        public interface IHasNoImplementation { }
-
-        public class Implementation : IImplementation { }
-        public class ImplementationOne : IMultipleImplementations { }
-        public class ImplementationTwo : IMultipleImplementations { }
-        public class ImplementationWithoutEmptyConstructor
+        public enum LocatorKey
         {
-            public ImplementationWithoutEmptyConstructor(int value) { }
+            Unimplemented,
+            Implemented
         }
 
+        public interface IPartlyImplemented : ILocatable<LocatorKey> { }
+
+        public class Implemented : IPartlyImplemented
+        {
+            public LocatorKey LocatorKey => LocatorKey.Implemented;
+        }
+
+        public interface ICompletelyUnImplemented : ILocatable<LocatorKey> { }
+
+        public interface IDoubleImplementedKey : ILocatable<LocatorKey> { }
+
+        public class FirstDoubleImplementation : IDoubleImplementedKey
+        {
+            public LocatorKey LocatorKey => LocatorKey.Implemented;
+        }
+
+        public class SecondDoubleImplementation : IDoubleImplementedKey
+        {
+            public LocatorKey LocatorKey => LocatorKey.Implemented;
+        }
 
         [Fact]
-        public void CreateInstance_UsingClassType_GivesInstance()
+        public void CreateInstance_UsingUnimplementedKey_Throws()
         {
             // Arrange
-            var locator = new ServiceLocator();
+            var locator = new ServiceLocator<LocatorKey, IPartlyImplemented>();
+
+            // Act && Assert
+            Assert.Throws<ArgumentException>(() => locator.CreateInstance(LocatorKey.Unimplemented));
+        }
+
+        [Fact]
+        public void CreateInstance_UsingValidKey_GivesInstance()
+        {
+            // Arrange
+            var locator = new ServiceLocator<LocatorKey, IPartlyImplemented>();
 
             // Act
-            var instance = locator.CreateInstance<Implementation>();
+            var instance = locator.CreateInstance(LocatorKey.Implemented);
 
             // Assert
             Assert.NotNull(instance);
-            Assert.IsType<Implementation>(instance);
+            Assert.IsType<Implemented>(instance);
         }
 
         [Fact]
-        public void CreateInstance_InterfaceHasOneImplementation_GivesInstance()
+        public void CreateInstances_HasSomeImplementations_GivesInstances()
         {
             // Arrange
-            var locator = new ServiceLocator();
+            var locator = new ServiceLocator<LocatorKey, IPartlyImplemented>();
 
             // Act
-            var instance = locator.CreateInstance<IImplementation>();
+            var instances = locator.CreateInstances();
 
             // Assert
-            Assert.NotNull(instance);
-            Assert.IsType<Implementation>(instance);
+            Assert.NotNull(instances);
+            Assert.Single(instances);
         }
 
         [Fact]
-        public void CreateInstance_InterfaceHasMultipleImplementations_Throws()
+        public void InstantiateServiceLocator_InterfaceHasNoImplementations_Throws()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
-            // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IMultipleImplementations>());
+            // Arrange, Act && Assert
+            Assert.Throws<ArgumentException>(() => new ServiceLocator<LocatorKey, ICompletelyUnImplemented>());
         }
 
         [Fact]
-        public void CreateInstances_InterfaceHasMultipleImplementations_GivesInstances()
+        public void InstantiateServiceLocator_InterfaceMultipleImplementationsWithSameKey_Throws()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
-            // Act
-            var instances = locator.CreateInstances<IMultipleImplementations>()
-                                    .ToList();
-
-            // Assert
-            Assert.Equal(2, instances.Count);
-        }
-
-        [Fact]
-        public void CreateInstance_ImplementationHasNoEmptyConstructor_Throws()
-        {
-            // Arrange
-            var locator = new ServiceLocator();
-
-            // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<ImplementationWithoutEmptyConstructor>());
-        }
-
-        [Fact]
-        public void CreateInstance_InterfaceHasNoImplementation_Throws()
-        {
-            // Arrange
-            var locator = new ServiceLocator();
-
-            // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHasNoImplementation>());
+            // Arrange, Act && Assert
+            Assert.Throws<ArgumentException>(() => new ServiceLocator<LocatorKey, IDoubleImplementedKey>());
         }
     }
 }

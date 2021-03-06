@@ -38,19 +38,23 @@ namespace Ckode.ServiceLocator
                 _constructors = new Dictionary<TKey, Func<T>>();
                 var interfaceType = typeof(T);
 
-                var classTypes = Types.Where(type => interfaceType.IsAssignableFrom(type));
-
-                foreach (var classType in classTypes)
+                var foundImplementations = ImplementationTypes.Where(type => interfaceType.IsAssignableFrom(type));
+                if (!foundImplementations.Any())
                 {
-                    var ctorDelegate = CreateCtorDelegate(classType);
-                    var instance = ctorDelegate();
+                    throw new ArgumentException($"The type {interfaceType.Name} has no implementations.");
+                }
+
+                foreach (var implementationType in foundImplementations)
+                {
+                    var constructorDelegate = CreateConstructorDelegate(implementationType);
+                    var instance = constructorDelegate();
                     var key = instance.LocatorKey;
                     if (_constructors.ContainsKey(key))
                     {
-                        throw new InvalidOperationException("Two classes are not allowed to return the same key when calling GetKey.");
+                        throw new ArgumentException($"Multiple classes are not allowed to return the same LocatorKey: {key}");
                     }
 
-                    _constructors[key] = ctorDelegate;
+                    _constructors[key] = constructorDelegate;
                 }
                 _cachedConstructors[locatorType] = _constructors;
             }
@@ -66,19 +70,19 @@ namespace Ckode.ServiceLocator
 
         public T CreateInstance(TKey key)
         {
-            if (!_constructors.TryGetValue(key, out var ctorDelegate))
+            if (!_constructors.TryGetValue(key, out var constructorDelegate))
             {
                 throw new ArgumentException(string.Format("Couldn't find any class that implements type {0} and has the key {1}.", typeof(T).Name, key), "key");
             }
 
-            return ctorDelegate();
+            return constructorDelegate();
         }
 
-        private Func<T> CreateCtorDelegate(Type classType)
+        private Func<T> CreateConstructorDelegate(Type implementationType)
         {
-            var ctorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
+            var constructorInfo = implementationType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 
-            return (Func<T>)CreateDelegate<T>(ctorInfo);
+            return (Func<T>)CreateDelegate<T>(constructorInfo);
         }
     }
 }

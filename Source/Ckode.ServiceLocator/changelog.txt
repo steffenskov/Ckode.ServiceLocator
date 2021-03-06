@@ -1,5 +1,11 @@
 ﻿Version	Date		Developer
 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+2.0.0	06-03-2021	Steffen Skov
+
+	* Converted library fully to .net standard 2.0 and added full code coverage unit tests.
+	* Slight performance optimization as well, by removed unused code.
+
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 1.1.1	27-01-2019	Steffen Skov
 
 	* Added static IList<string> FailedAssemblies to the base class BaseServiceLocator.
