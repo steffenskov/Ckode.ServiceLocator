@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "Ckode.ServiceLocator/2.1.0": {
+      "Ckode.ServiceLocator/2.1.1": {
         "dependencies": {
           "NETStandard.Library": "2.0.3",
           "System.Reflection.Emit.Lightweight": "4.7.0"
@@ -44,7 +44,7 @@
     }
   },
   "libraries": {
-    "Ckode.ServiceLocator/2.1.0": {
+    "Ckode.ServiceLocator/2.1.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
