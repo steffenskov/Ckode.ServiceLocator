@@ -14,6 +14,11 @@ Ckode.ServiceLocator is a simple natively implemented service locator for simpli
     var locator = new ServiceLocator();
     IEnumerable<ISomeInterface> instances = locator.CreateInstances<ISomeInterface>(); // Works regardless of the number of implementations, as you get an IEnumerable of instances
 
+*Create instance based on predicate:*
+
+    var locator = new ServiceLocator();
+    ISomeInterface instance = locator.CreateInstance<ISomeInterface>(inst => inst.UseThisOne(someArgument)); // Requires that only a single class implements ISomeInterface AND fulfills the predicate
+
 *Create instance based on a key:*
 
     public enum VehicleType

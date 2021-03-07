@@ -10,6 +10,10 @@ namespace Ckode.ServiceLocator.Tests
         public interface IMultipleImplementations { }
         public interface IHasNoImplementation { }
         public interface IObjectImplementation { }
+        public interface IHashingAlgorithm
+        {
+            bool IsThisAlgorithm(string hashedValue);
+        }
 
         public class ObjectImplementation : IObjectImplementation { }
         public class Implementation : IImplementation { }
@@ -20,6 +24,20 @@ namespace Ckode.ServiceLocator.Tests
             public ImplementationWithoutEmptyConstructor(int value) { }
         }
 
+        public class MD5 : IHashingAlgorithm
+        {
+            public bool IsThisAlgorithm(string hashedValue)
+            {
+                return hashedValue?.StartsWith("md5", StringComparison.OrdinalIgnoreCase) == true; // simple approach for unit test
+            }
+        }
+        public class SHA1 : IHashingAlgorithm
+        {
+            public bool IsThisAlgorithm(string hashedValue)
+            {
+                return hashedValue?.StartsWith("sha1", StringComparison.OrdinalIgnoreCase) == true; // simple approach for unit test
+            }
+        }
 
         [Fact]
         public void CreateInstance_UsingClassType_GivesInstance()
@@ -105,6 +123,40 @@ namespace Ckode.ServiceLocator.Tests
 
             // Act && Assert
             Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHasNoImplementation>());
+        }
+
+        [Fact]
+        public void CreateInstanceWithPredicate_PredicateResultsInNoImplementations_Throws()
+        {
+            // Arrange
+            var locator = new ServiceLocator();
+
+            // Act && Assert
+            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHashingAlgorithm>(algo => algo.IsThisAlgorithm("sha256")));
+        }
+
+        [Fact]
+        public void CreateInstanceWithPredicate_PredicateResultsInMultipleImplementations_Throws()
+        {
+            // Arrange
+            var locator = new ServiceLocator();
+
+            // Act && Assert
+            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHashingAlgorithm>(algo => true));
+        }
+
+        [Fact]
+        public void CreateInstanceWithPredicate_PredicateResultsInSingleImplementation_GivesInstance()
+        {
+            // Arrange
+            var locator = new ServiceLocator();
+
+            // Act
+            var algorithm = locator.CreateInstance<IHashingAlgorithm>(algo => algo.IsThisAlgorithm("md5"));
+
+            // Assert
+            Assert.NotNull(algorithm);
+            Assert.IsType<MD5>(algorithm);
         }
     }
 }

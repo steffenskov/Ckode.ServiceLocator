@@ -26,7 +26,7 @@ namespace Ckode.ServiceLocator
         /// Create an instance of the class that implements the given type.
         /// </summary>
         /// <typeparam name="T">The interface or baseclass the class must implement</typeparam>
-        /// <returns></returns>
+        /// <returns>Instance of class</returns>
         public T CreateInstance<T>()
         {
             var type = typeof(T);
@@ -35,6 +35,35 @@ namespace Ckode.ServiceLocator
             return ((Func<T>)constructorDelegate)();
         }
 
+        /// <summary>
+        /// Create an instance of the class that implements the given type AND fulfills the predicate.
+        /// </summary>
+        /// <typeparam name="T">The interface or baseclass the class must implement</typeparam>
+        /// <param name="predicate">Predicate which must be fulfilled for the instance to be returned</param>
+        public T CreateInstance<T>(Predicate<T> predicate)
+        {
+            var instances = CreateInstances<T>()
+                                .Where(instance => predicate(instance))
+                                .ToList();
+
+            if (instances.Count == 0)
+            {
+                throw new ArgumentException($"No implementations of {typeof(T).Name} matched the given predicate.", nameof(predicate));
+            }
+
+            if (instances.Count > 1)
+            {
+                throw new ArgumentException($"Multiple implementations of {typeof(T).Name} matched the given predicate.", nameof(predicate));
+            }
+
+            return instances[0];
+        }
+
+        /// <summary>
+        /// Create an instance of the class that implements the given type.
+        /// </summary>
+        /// <param name="type">The interface or baseclass the class must implement</param>
+        /// <returns>Instance of class</returns>
         public object CreateInstance(Type type)
         {
             var constructorDelegate = GetConstructorDelegate(type, CreateObjectConstructorDelegate);
