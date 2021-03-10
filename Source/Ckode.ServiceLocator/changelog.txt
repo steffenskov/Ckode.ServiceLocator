@@ -1,5 +1,12 @@
 ﻿Version	Date		Developer
 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+2.2.0	10-03-2021	Steffen Skov
+
+	* Added Bind<TInterface, TImplementation> and Unbind<TInterface> methods on the ServiceLocator class for easily mocking / faking dependencies for unit tests.
+	* Converted the basic ServiceLocator to be static, as the Bind and Unbind methods work in a static fashion, and this is easier to comprehend when everything is static.
+	* Moved the ServiceLocator classes to reside straight in the Ckode namespace as the class name collides with the namespace otherwise.
+
+¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 2.1.0	07-03-2021	Steffen Skov
 
 	* Added CreateInstance<T>(Predicate<T> predicate) method to the ServiceLocator class.

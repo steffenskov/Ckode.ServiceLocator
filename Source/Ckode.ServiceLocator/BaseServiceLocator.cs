@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Ckode.ServiceLocator
+namespace Ckode
 {
     public abstract class BaseServiceLocator
     {

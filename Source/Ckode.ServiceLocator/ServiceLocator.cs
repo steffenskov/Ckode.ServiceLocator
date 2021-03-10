@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Ckode.ServiceLocator
+namespace Ckode
 {
     public sealed class ServiceLocator
         : BaseServiceLocator
@@ -13,6 +13,7 @@ namespace Ckode.ServiceLocator
         private static readonly IDictionary<Type, IList<Delegate>> _multipleConstructors;
         private static readonly object _constructorsLock;
         private static readonly object _multipleConstructorsLock;
+        private static readonly IDictionary<Type, Type> _boundImplementations;
 
         static ServiceLocator()
         {
@@ -20,6 +21,11 @@ namespace Ckode.ServiceLocator
             _multipleConstructorsLock = new object();
             _constructors = new ConcurrentDictionary<Type, Delegate>();
             _multipleConstructors = new ConcurrentDictionary<Type, IList<Delegate>>();
+            _boundImplementations = new ConcurrentDictionary<Type, Type>();
+        }
+
+        private ServiceLocator() // Don't support instantiation as everything is static
+        {
         }
 
         /// <summary>
@@ -27,10 +33,12 @@ namespace Ckode.ServiceLocator
         /// </summary>
         /// <typeparam name="T">The interface or baseclass the class must implement</typeparam>
         /// <returns>Instance of class</returns>
-        public T CreateInstance<T>()
+        public static T CreateInstance<T>()
         {
             var type = typeof(T);
-            var constructorDelegate = GetConstructorDelegate(type, CreateConstructorDelegate<T>);
+            var constructorDelegate = _boundImplementations.TryGetValue(type, out var implementationType)
+                                            ? GetConstructorDelegate(implementationType, CreateConstructorDelegate<T>)
+                                            : GetConstructorDelegate(type, CreateConstructorDelegate<T>);
 
             return ((Func<T>)constructorDelegate)();
         }
@@ -40,7 +48,7 @@ namespace Ckode.ServiceLocator
         /// </summary>
         /// <typeparam name="T">The interface or baseclass the class must implement</typeparam>
         /// <param name="predicate">Predicate which must be fulfilled for the instance to be returned</param>
-        public T CreateInstance<T>(Predicate<T> predicate)
+        public static T CreateInstance<T>(Predicate<T> predicate)
         {
             var instances = CreateInstances<T>()
                                 .Where(instance => predicate(instance))
@@ -64,14 +72,14 @@ namespace Ckode.ServiceLocator
         /// </summary>
         /// <param name="type">The interface or baseclass the class must implement</param>
         /// <returns>Instance of class</returns>
-        public object CreateInstance(Type type)
+        public static object CreateInstance(Type type)
         {
             var constructorDelegate = GetConstructorDelegate(type, CreateObjectConstructorDelegate);
 
             return ((Func<object>)constructorDelegate)();
         }
 
-        private Delegate GetConstructorDelegate(Type type, Func<Type, Delegate> createDelegate)
+        private static Delegate GetConstructorDelegate(Type type, Func<Type, Delegate> createDelegate)
         {
             if (!_constructors.TryGetValue(type, out var constructorDelegate))
             {
@@ -91,7 +99,7 @@ namespace Ckode.ServiceLocator
         /// </summary>
         /// <typeparam name="T">The interface the classes must implement</typeparam>
         /// <returns></returns>
-        public IEnumerable<T> CreateInstances<T>()
+        public static IEnumerable<T> CreateInstances<T>()
         {
             var interfaceType = typeof(T);
             if (!_multipleConstructors.TryGetValue(interfaceType, out var constructorDelegates))
@@ -110,7 +118,21 @@ namespace Ckode.ServiceLocator
                     .Select(ctor => ctor());
         }
 
-        private IList<Delegate> CreateMultipleConstructorDelegates<T>(Type interfaceType)
+        public static void Bind<TInterface, TImplementation>()
+            where TImplementation : TInterface
+        {
+            var interfaceType = typeof(TInterface);
+            var implementationType = typeof(TImplementation);
+            _boundImplementations[interfaceType] = implementationType;
+        }
+
+        public static void Unbind<TInterface>()
+        {
+            var interfaceType = typeof(TInterface);
+            _boundImplementations.Remove(interfaceType);
+        }
+
+        private static IList<Delegate> CreateMultipleConstructorDelegates<T>(Type interfaceType)
         {
             var classTypes = ImplementationTypes
                                 .Where(type => interfaceType.IsAssignableFrom(type));
@@ -123,14 +145,14 @@ namespace Ckode.ServiceLocator
                     .ToList();
         }
 
-        private Delegate CreateConstructorDelegate<T>(Type interfaceType)
+        private static Delegate CreateConstructorDelegate<T>(Type interfaceType)
         {
             var constructorInfo = GetConstructorInfo(interfaceType);
 
             return CreateDelegate<T>(constructorInfo);
         }
 
-        private Delegate CreateObjectConstructorDelegate(Type interfaceType)
+        private static Delegate CreateObjectConstructorDelegate(Type interfaceType)
         {
             var constructorInfo = GetConstructorInfo(interfaceType);
 

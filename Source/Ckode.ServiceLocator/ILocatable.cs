@@ -1,4 +1,4 @@
-﻿namespace Ckode.ServiceLocator
+﻿namespace Ckode
 {
     public interface ILocatable<TKey>
     {

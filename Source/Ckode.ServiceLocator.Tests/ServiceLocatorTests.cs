@@ -2,12 +2,14 @@ using System;
 using System.Linq;
 using Xunit;
 
-namespace Ckode.ServiceLocator.Tests
+namespace Ckode.Tests
 {
     public class ServiceLocatorTests
     {
         public interface IImplementation { }
-        public interface IMultipleImplementations { }
+        public interface IMultipleImplementations
+        {
+        }
         public interface IHasNoImplementation { }
         public interface IObjectImplementation { }
         public interface IHashingAlgorithm
@@ -42,11 +44,8 @@ namespace Ckode.ServiceLocator.Tests
         [Fact]
         public void CreateInstance_UsingClassType_GivesInstance()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act
-            var instance = locator.CreateInstance<Implementation>();
+            var instance = ServiceLocator.CreateInstance<Implementation>();
 
             // Assert
             Assert.NotNull(instance);
@@ -56,11 +55,8 @@ namespace Ckode.ServiceLocator.Tests
         [Fact]
         public void CreateInstance_InterfaceHasOneImplementation_GivesInstance()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act
-            var instance = locator.CreateInstance<IImplementation>();
+            var instance = ServiceLocator.CreateInstance<IImplementation>();
 
             // Assert
             Assert.NotNull(instance);
@@ -70,11 +66,8 @@ namespace Ckode.ServiceLocator.Tests
         [Fact]
         public void CreateInstanceWithoutGenerics_InterfaceHasOneImplementation_GivesInstance()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act
-            var instance = locator.CreateInstance(typeof(IObjectImplementation));
+            var instance = ServiceLocator.CreateInstance(typeof(IObjectImplementation));
 
             // Assert
             Assert.NotNull(instance);
@@ -84,21 +77,15 @@ namespace Ckode.ServiceLocator.Tests
         [Fact]
         public void CreateInstance_InterfaceHasMultipleImplementations_Throws()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IMultipleImplementations>());
+            Assert.Throws<ArgumentException>(() => ServiceLocator.CreateInstance<IMultipleImplementations>());
         }
 
         [Fact]
         public void CreateInstances_InterfaceHasMultipleImplementations_GivesInstances()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act
-            var instances = locator.CreateInstances<IMultipleImplementations>()
+            var instances = ServiceLocator.CreateInstances<IMultipleImplementations>()
                                     .ToList();
 
             // Assert
@@ -108,51 +95,103 @@ namespace Ckode.ServiceLocator.Tests
         [Fact]
         public void CreateInstance_ImplementationHasNoEmptyConstructor_Throws()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<ImplementationWithoutEmptyConstructor>());
+            Assert.Throws<ArgumentException>(() => ServiceLocator.CreateInstance<ImplementationWithoutEmptyConstructor>());
         }
 
         [Fact]
         public void CreateInstance_InterfaceHasNoImplementation_Throws()
         {
+            // Act && Assert
+            Assert.Throws<ArgumentException>(() => ServiceLocator.CreateInstance<IHasNoImplementation>());
+        }
+
+        [Fact]
+        public void CreateInstanceWithBind_InterfaceHasMultipleImplementations_GivesInstance()
+        {
             // Arrange
-            var locator = new ServiceLocator();
+            ServiceLocator.Bind<IMultipleImplementations, ImplementationOne>();
+            try
+            {
+                // Act
+                var instance = ServiceLocator.CreateInstance<IMultipleImplementations>();
+
+                // Assert
+                Assert.IsType<ImplementationOne>(instance);
+            }
+            finally
+            {
+                ServiceLocator.Unbind<IMultipleImplementations>();
+            }
+        }
+
+        [Fact]
+        public void CreateInstanceWithBind_OverwriteBind_GivesProperInstance()
+        {
+            // Arrange
+            ServiceLocator.Bind<IMultipleImplementations, ImplementationOne>();
+            try
+            {
+                // Act
+                var instance = ServiceLocator.CreateInstance<IMultipleImplementations>();
+
+                // Assert
+                Assert.IsType<ImplementationOne>(instance);
+
+                // Rearrange
+                ServiceLocator.Bind<IMultipleImplementations, ImplementationTwo>();
+
+                // Act
+                instance = ServiceLocator.CreateInstance<IMultipleImplementations>();
+
+                // Assert
+                Assert.IsType<ImplementationTwo>(instance);
+            }
+            finally
+            {
+                ServiceLocator.Unbind<IMultipleImplementations>();
+            }
+        }
+
+        [Fact]
+        public void CreateInstanceWithBindAndUnbind_InterfaceHasMultipleImplementations_Throws()
+        {
+            // Arrange
+            ServiceLocator.Bind<IMultipleImplementations, ImplementationOne>();
+
+            // Act
+            var instance = ServiceLocator.CreateInstance<IMultipleImplementations>();
+
+            // Assert
+            Assert.IsType<ImplementationOne>(instance);
+
+
+            // Rearrange
+            ServiceLocator.Unbind<IMultipleImplementations>();
 
             // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHasNoImplementation>());
+            Assert.Throws<ArgumentException>(() => ServiceLocator.CreateInstance<IMultipleImplementations>());
         }
 
         [Fact]
         public void CreateInstanceWithPredicate_PredicateResultsInNoImplementations_Throws()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHashingAlgorithm>(algo => algo.IsThisAlgorithm("sha256")));
+            Assert.Throws<ArgumentException>(() => ServiceLocator.CreateInstance<IHashingAlgorithm>(algo => algo.IsThisAlgorithm("sha256")));
         }
 
         [Fact]
         public void CreateInstanceWithPredicate_PredicateResultsInMultipleImplementations_Throws()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act && Assert
-            Assert.Throws<ArgumentException>(() => locator.CreateInstance<IHashingAlgorithm>(algo => true));
+            Assert.Throws<ArgumentException>(() => ServiceLocator.CreateInstance<IHashingAlgorithm>(algo => true));
         }
 
         [Fact]
         public void CreateInstanceWithPredicate_PredicateResultsInSingleImplementation_GivesInstance()
         {
-            // Arrange
-            var locator = new ServiceLocator();
-
             // Act
-            var algorithm = locator.CreateInstance<IHashingAlgorithm>(algo => algo.IsThisAlgorithm("md5"));
+            var algorithm = ServiceLocator.CreateInstance<IHashingAlgorithm>(algo => algo.IsThisAlgorithm("md5"));
 
             // Assert
             Assert.NotNull(algorithm);

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Xunit;
 
-namespace Ckode.ServiceLocator.Tests
+namespace Ckode.Tests
 {
     public class GenericServiceLocatorTests
     {

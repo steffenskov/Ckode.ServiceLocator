@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Ckode.ServiceLocator
+namespace Ckode
 {
     public class ServiceLocator<TKey, T>
           : BaseServiceLocator

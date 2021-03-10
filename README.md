@@ -5,28 +5,71 @@ Ckode.ServiceLocator is a simple natively implemented service locator for simpli
 
 *Create a single instance:*
 
-    var locator = new ServiceLocator();
-    ISomeInterface instance = locator.CreateInstance<ISomeInterface>(); // Requires that only a single class implements ISomeInterface
+    ISomeInterface instance = ServiceLocator.CreateInstance<ISomeInterface>(); // Requires that only a single class implements ISomeInterface
 
 
 *Create multiple instances:*
 
-    var locator = new ServiceLocator();
-    IEnumerable<ISomeInterface> instances = locator.CreateInstances<ISomeInterface>(); // Works regardless of the number of implementations, as you get an IEnumerable of instances
+    IEnumerable<ISomeInterface> instances = ServiceLocator.CreateInstances<ISomeInterface>(); // Works regardless of the number of implementations, as you get an IEnumerable of instances
 
 *Create instance based on predicate:*
 
-    var locator = new ServiceLocator();
-    ISomeInterface instance = locator.CreateInstance<ISomeInterface>(inst => inst.UseThisOne(someArgument)); // Requires that only a single class implements ISomeInterface AND fulfills the predicate
+    ISomeInterface instance = ServiceLocator.CreateInstance<ISomeInterface>(inst => inst.UseThisOne(someArgument)); // Requires that only a single class implements ISomeInterface AND fulfills the predicate
+
+*Fake dependency for e.g. unit tests:*
+
+    public interface IDependency
+    {
+        string Value{ get; }
+    }
+    
+    public class ActualImplementation : IDependency
+    {
+        // Some actual implementation
+    }
+
+    public class TextFormatter
+    {
+        public string AppendValueFromDependency(string textToAppendTo)
+        {
+            var dependency = ServiceLocator.CreateInstance<IDependency>();
+            return textToAppendTo + dependency.Value;
+        }
+    }
+
+    public class TextFormattersTests
+    {
+        private class MyFake : IDependency
+        {
+            public string Value => "World";
+        }
+    
+        [Fact]
+        public void TextFormatter_AppendValueFromDependency_GeneratesProperString()
+        {
+            // Arrange
+            ServiceLocator.Bind<IDependency, MyFake>(); // Forces TextFormatter to use MyFake instead of whatever the ActualImplementation was doing
+            var formatter = new TextFormatter();
+            
+            // Act
+            var value = formatter.AppendValueFromDependency("Hello ");
+            
+            // Assert
+            Assert.Equal("Hello world", value);
+            
+            // Cleanup
+            ServiceLocator.Unbind<IDependency>(); // Optionally unbind IDependency, if you don't want it to be MyFake in other tests as the binding is static
+        }
+    }
 
 *Create instance based on a key:*
 
     public enum VehicleType
     {
-		Car,
-		Bike,
-		Plane,
-		Boat
+        Car,
+        Bike,
+        Plane,
+        Boat
     }
 
     public interface IVehicle: ILocatable<VehicleType>
@@ -35,10 +78,10 @@ Ckode.ServiceLocator is a simple natively implemented service locator for simpli
     
     public class Car: IVehicle
     {
-		public VehicleType LocatorKey => VehicleType.Car;
+        public VehicleType LocatorKey => VehicleType.Car;
     }
     
-    var locator = new ServiceLocator();
+    var locator = new ServiceLocator<VehicleType, IVehicle();
     IVehicle car = locator.CreateInstance(VehicleType.Car); // Requires that only a single class has LocatorKey == VehicleType.Car
 
 *Create multiple instances with keys:*
@@ -46,10 +89,10 @@ Ckode.ServiceLocator is a simple natively implemented service locator for simpli
 
     public enum VehicleType
     {
-		Car,
-		Bike,
-		Plane,
-		Boat
+        Car,
+        Bike,
+        Plane,
+        Boat
     }
 
     public interface IVehicle: ILocatable<VehicleType>
@@ -58,8 +101,8 @@ Ckode.ServiceLocator is a simple natively implemented service locator for simpli
     
     public class Car: IVehicle
     {
-		public VehicleType LocatorKey => VehicleType.Car;
+        public VehicleType LocatorKey => VehicleType.Car;
     }
     
-    var locator = new ServiceLocator();
+    var locator = new ServiceLocator<VehicleType, IVehicle>();
     IEnumerable<IVehicle> vehicles = locator.CreateInstances(); // Still requires that only a single class has each LocatorKey, but does work fine despite some keys not being implemented yet.
