@@ -1,6 +1,10 @@
 # Ckode.ServiceLocator
 Ckode.ServiceLocator is a simple natively implemented service locator for simplifying dependency injection.
 
+**Installation:**
+
+I recommend using the NuGet package: https://www.nuget.org/packages/Ckode.ServiceLocator/ however you can also simply clone the repository and use the pre-compiled binaries or compile the project yourself.
+
 **Examples:**
 
 *Create a single instance:*

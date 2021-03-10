@@ -12,6 +12,8 @@
     <Authors>Steffen Skov</Authors>
     <RootNamespace>Ckode</RootNamespace>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <Description>A simple natively implemented service locator for simplifying dependency injection.
+See the GitHub page for usage examples.</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
