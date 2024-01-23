@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace Ckode
 {
@@ -134,14 +135,21 @@ namespace Ckode
 
         private static IList<Delegate> CreateMultipleConstructorDelegates<T>(Type interfaceType)
         {
-            var classTypes = ImplementationTypes
-                                .Where(type => interfaceType.IsAssignableFrom(type));
+            var implementationTypes = ImplementationTypes
+                .Where(interfaceType.IsAssignableFrom)
+                .ToList();
 
-            var constructorInfos = classTypes
+            var constructorInfos = implementationTypes
+                                    .Where(type => type.IsClass)
                                     .Select(classType => classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null));
+
+            var structDelegates = implementationTypes
+                .Where(type => type.IsValueType)
+                .Select(CreateStructDelegate<T>);
 
             return constructorInfos
                     .Select(CreateDelegate<T>)
+                    .Concat(structDelegates)
                     .ToList();
         }
 
@@ -161,21 +169,21 @@ namespace Ckode
 
         private static ConstructorInfo GetConstructorInfo(Type interfaceType)
         {
-            IList<Type> classTypes = (interfaceType.IsInterface || interfaceType.IsAbstract)
+            IList<Type> implementationTypes = (interfaceType.IsInterface || interfaceType.IsAbstract)
                                         ? ImplementationTypes
-                                            .Where(type => interfaceType.IsAssignableFrom(type))
+                                            .Where(interfaceType.IsAssignableFrom)
                                             .ToArray()
                                         : new[] { interfaceType };
 
-            if (classTypes.Count > 1)
+            if (implementationTypes.Count > 1)
             {
                 throw new ArgumentException($"Multiple implementations of type {interfaceType.Name} exists, cannot create a single instance.", nameof(interfaceType));
             }
-            if (classTypes.Count == 0)
+            if (implementationTypes.Count == 0)
             {
                 throw new ArgumentException($"No implementations of type {interfaceType.Name} exists, cannot create an instance.", nameof(interfaceType));
             }
-            var classType = classTypes[0];
+            var classType = implementationTypes[0];
 
             var constructorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 

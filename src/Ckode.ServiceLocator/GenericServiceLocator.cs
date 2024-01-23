@@ -38,7 +38,7 @@ namespace Ckode
                 _constructors = new Dictionary<TKey, Func<T>>();
                 var interfaceType = typeof(T);
 
-                var foundImplementations = ImplementationTypes.Where(type => interfaceType.IsAssignableFrom(type));
+                var foundImplementations = ImplementationTypes.Where(type => interfaceType.IsAssignableFrom(type)).ToList();
                 if (!foundImplementations.Any())
                 {
                     throw new ArgumentException($"The type {interfaceType.Name} has no implementations.");
@@ -72,13 +72,13 @@ namespace Ckode
         {
             if (!_constructors.TryGetValue(key, out var constructorDelegate))
             {
-                throw new ArgumentException(string.Format("Couldn't find any class that implements type {0} and has the key {1}.", typeof(T).Name, key), "key");
+                throw new ArgumentException($"Couldn't find any class that implements type {typeof(T).Name} and has the key {key}.", nameof(key));
             }
 
             return constructorDelegate();
         }
 
-        private Func<T> CreateConstructorDelegate(Type implementationType)
+        private static Func<T> CreateConstructorDelegate(Type implementationType)
         {
             var constructorInfo = implementationType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 
