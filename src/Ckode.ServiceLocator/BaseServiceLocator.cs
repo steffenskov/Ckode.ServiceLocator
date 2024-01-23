@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Serialization;
 
 namespace Ckode
 {
@@ -25,7 +26,7 @@ namespace Ckode
             FailedAssemblies = failed.AsReadOnly();
 
             ImplementationTypes = types
-                                    .Where(type => type.IsClass && !type.IsAbstract)
+                                    .Where(type => !type.IsAbstract && !type.IsInterface)
                                     .ToList()
                                     .AsReadOnly();
         }
@@ -43,7 +44,7 @@ namespace Ckode
                                         catch (Exception ex)
                                         {
                                             failed.Add($"{assembly.FullName}: {ex}");
-                                            return new Type[0];
+                                            return Type.EmptyTypes;
                                         }
                                     });
             return (foundTypes, failed);
@@ -61,11 +62,23 @@ namespace Ckode
             return CreateDelegateInternal(constructor, delegateType);
         }
 
+        protected static Delegate CreateStructDelegate(Type structType)
+        {
+            return (Func<object>)CreateStructInstance;
+            object CreateStructInstance() => Activator.CreateInstance(structType);
+        }
+        
+        protected static Delegate CreateStructDelegate<T>(Type structType)
+        {
+            return (Func<T>)CreateStructInstance;
+            T CreateStructInstance() => (T)Activator.CreateInstance(structType);
+        }
+
         private static Delegate CreateDelegateInternal(ConstructorInfo constructor, Type delegateType)
         {
             if (constructor == null)
             {
-                throw new ArgumentNullException("constructor");
+                throw new ArgumentNullException(nameof(constructor));
             }
 
             // Validate the delegate return type
@@ -79,7 +92,7 @@ namespace Ckode
             // Create the dynamic method
             var method =
                 new DynamicMethod(
-                    string.Format("{0}__{1}", constructor.DeclaringType.Name, Guid.NewGuid().ToString().Replace("-", "")),
+                    $"{constructor.DeclaringType.Name}__{Guid.NewGuid().ToString().Replace("-", "")}",
                     constructor.DeclaringType,
                     Array.ConvertAll<ParameterInfo, Type>(constructorParam, p => p.ParameterType),
                     true

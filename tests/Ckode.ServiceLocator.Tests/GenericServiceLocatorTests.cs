@@ -33,6 +33,15 @@ namespace Ckode.Tests
             public LocatorKey LocatorKey => LocatorKey.Implemented;
         }
 
+        public interface IStruct : ILocatable<LocatorKey>
+        {
+        }
+
+        public struct StructImplementation : IStruct
+        {
+            public LocatorKey LocatorKey => LocatorKey.Implemented;
+        }
+
         [Fact]
         public void CreateInstance_UsingUnimplementedKey_Throws()
         {
@@ -83,6 +92,33 @@ namespace Ckode.Tests
         {
             // Arrange, Act && Assert
             Assert.Throws<ArgumentException>(() => new ServiceLocator<LocatorKey, IDoubleImplementedKey>());
+        }
+
+        [Fact]
+        public void CreateInstance_HasStructImplementation_GivesInstance()
+        {
+            // Arrange
+            var locator = new ServiceLocator<LocatorKey, IStruct>();
+            
+            // Act
+            var instance = locator.CreateInstance(LocatorKey.Implemented);
+            
+            // Assert
+            Assert.IsType<StructImplementation>(instance);
+        }
+
+        [Fact]
+        public void CreateInstances_HasStructImplementation_GivesInstance()
+        {
+            // Arrange
+            var locator = new ServiceLocator<LocatorKey, IStruct>();
+            
+            // Act
+            var instances = locator.CreateInstances();
+            
+            // Assert
+            var instance = Assert.Single(instances);
+            Assert.IsType<StructImplementation>(instance);
         }
     }
 }

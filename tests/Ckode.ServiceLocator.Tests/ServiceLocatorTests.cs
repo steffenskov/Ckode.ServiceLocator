@@ -6,6 +6,10 @@ namespace Ckode.Tests
 {
     public class ServiceLocatorTests
     {
+        public interface IStruct {}
+        public struct StructImplementation: IStruct
+        {
+        }
         public interface IImplementation { }
         public interface IMultipleImplementations
         {
@@ -196,6 +200,27 @@ namespace Ckode.Tests
             // Assert
             Assert.NotNull(algorithm);
             Assert.IsType<MD5>(algorithm);
+        }
+        
+        [Fact]
+        public void CreateInstance_ImplementationIsStruct_GivesInstance()
+        {
+            // Act
+            var implementation = ServiceLocator.CreateInstance<IStruct>();
+            
+            // Assert
+            Assert.IsType<StructImplementation>(implementation);
+        }
+
+        [Fact]
+        public void CreateInstances_OnlyImplementationIsStruct_GivesInstance()
+        {
+            // Act
+            var implementations = ServiceLocator.CreateInstances<IStruct>();
+            
+            // Assert
+            var implementation = Assert.Single(implementations);
+            Assert.IsType<StructImplementation>(implementation);
         }
     }
 }
