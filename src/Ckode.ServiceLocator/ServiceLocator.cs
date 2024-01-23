@@ -155,19 +155,30 @@ namespace Ckode
 
         private static Delegate CreateConstructorDelegate<T>(Type interfaceType)
         {
-            var constructorInfo = GetConstructorInfo(interfaceType); // TODO: Struct support
+            var implementationType = GetImplementationType(interfaceType); // TODO: Struct support
 
+            if (implementationType.IsValueType)
+            {
+                return CreateStructDelegate<T>(implementationType);
+            }
+
+            var constructorInfo = GetConstructorInfo(implementationType);
             return CreateDelegate<T>(constructorInfo);
         }
 
         private static Delegate CreateObjectConstructorDelegate(Type interfaceType)
         {
-            var constructorInfo = GetConstructorInfo(interfaceType); // TODO: Struct support
-
+            var implementationType = GetImplementationType(interfaceType); // TODO: Struct support
+            if (implementationType.IsValueType)
+            {
+                return CreateStructDelegate(implementationType);
+            }
+            
+            var constructorInfo = GetConstructorInfo(implementationType);
             return CreateDelegate(constructorInfo, interfaceType);
         }
 
-        private static ConstructorInfo GetConstructorInfo(Type interfaceType)
+        private static Type GetImplementationType(Type interfaceType)
         {
             IList<Type> implementationTypes = (interfaceType.IsInterface || interfaceType.IsAbstract)
                                         ? ImplementationTypes
@@ -183,13 +194,16 @@ namespace Ckode
             {
                 throw new ArgumentException($"No implementations of type {interfaceType.Name} exists, cannot create an instance.", nameof(interfaceType));
             }
-            var classType = implementationTypes[0];
+            return implementationTypes[0];
+        }
 
-            var constructorInfo = classType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
+        private static ConstructorInfo GetConstructorInfo(Type implementationType)
+        {
+            var constructorInfo = implementationType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
 
             if (constructorInfo == null)
             {
-                throw new ArgumentException($"The implementation of type {interfaceType.Name} doesn't have a parameterless constructor. This is required to create an instance.", nameof(interfaceType));
+                throw new ArgumentException($"The implementation type {implementationType.Name} doesn't have a parameterless constructor. This is required to create an instance.", nameof(implementationType));
             }
 
             return constructorInfo;

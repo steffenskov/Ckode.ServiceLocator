@@ -46,15 +46,20 @@ namespace Ckode
 
                 foreach (var implementationType in foundImplementations)
                 {
-                    var constructorDelegate = CreateConstructorDelegate(implementationType);
-                    var instance = constructorDelegate();
+                    Func<T> func;
+                    if (implementationType.IsValueType)
+                        func = (Func<T>)CreateStructDelegate<T>(implementationType); 
+                    else 
+                        func= CreateConstructorDelegate(implementationType);
+
+                    var instance = func();
                     var key = instance.LocatorKey;
                     if (_constructors.ContainsKey(key))
                     {
                         throw new ArgumentException($"Multiple classes are not allowed to return the same LocatorKey: {key}");
                     }
 
-                    _constructors[key] = constructorDelegate;
+                    _constructors[key] = func;
                 }
                 _cachedConstructors[locatorType] = _constructors;
             }
@@ -77,7 +82,7 @@ namespace Ckode
 
             return constructorDelegate();
         }
-
+        
         private static Func<T> CreateConstructorDelegate(Type implementationType)
         {
             var constructorInfo = implementationType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);

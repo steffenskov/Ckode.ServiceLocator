@@ -62,10 +62,16 @@ namespace Ckode
             return CreateDelegateInternal(constructor, delegateType);
         }
 
+        protected static Delegate CreateStructDelegate(Type structType)
+        {
+            return (Func<object>)CreateStructInstance;
+            object CreateStructInstance() => Activator.CreateInstance(structType);
+        }
+        
         protected static Delegate CreateStructDelegate<T>(Type structType)
         {
             return (Func<T>)CreateStructInstance;
-            T CreateStructInstance() => (T)FormatterServices.GetUninitializedObject(structType);
+            T CreateStructInstance() => (T)Activator.CreateInstance(structType);
         }
 
         private static Delegate CreateDelegateInternal(ConstructorInfo constructor, Type delegateType)
