@@ -155,14 +155,14 @@ namespace Ckode
 
         private static Delegate CreateConstructorDelegate<T>(Type interfaceType)
         {
-            var constructorInfo = GetConstructorInfo(interfaceType);
+            var constructorInfo = GetConstructorInfo(interfaceType); // TODO: Struct support
 
             return CreateDelegate<T>(constructorInfo);
         }
 
         private static Delegate CreateObjectConstructorDelegate(Type interfaceType)
         {
-            var constructorInfo = GetConstructorInfo(interfaceType);
+            var constructorInfo = GetConstructorInfo(interfaceType); // TODO: Struct support
 
             return CreateDelegate(constructorInfo, interfaceType);
         }
