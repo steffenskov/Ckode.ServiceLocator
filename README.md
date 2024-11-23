@@ -111,3 +111,6 @@ As the project is licensed under MIT you're free to use it for pretty much anyth
     
     var locator = new ServiceLocator<VehicleType, IVehicle>();
     IEnumerable<IVehicle> vehicles = locator.CreateInstances(); // Still requires that only a single class has each LocatorKey, but does work fine despite some keys not being implemented yet.
+
+# Documentation
+Auto generated documentation via [DocFx](https://github.com/dotnet/docfx) is available here: https://steffenskov.github.io/Ckode.ServiceLocator/
